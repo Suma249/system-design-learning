@@ -1,0 +1,37 @@
+imagine there is a computer and there is some code running on the system, this code takes some input and returns output
+people see this and they are ready to pay us to use this code, and now we cannot go around giving our computer to everybody
+so we expose our code using some protocol which is going to be running on the internet
+and by exposing code using api, when this api is invoked the code on our system does runa nd gives output based on input 
+but instead of storing this output in some database or file system, we return that and thast called a response
+
+difference between cloud and desktop?
+cloud is a set of computers that somebody provides to you for money, ex: aws: if we pay them they provide us computational power which is nothing but a computer thaty is somewhere and able to run our code
+by doing remote login into that computer we can store our code there
+
+to avoid our desktop computer where our code is running from going down due to power cut or something we we host it on cloud 
+
+there are lots of people who are udsing our algorithm now, and gets to the point where the code that you have running on the machine is not able to handle all these conections
+(requests from people to our algorithm running on the syste hosten on cloud)
+so what can we do in these situations?
+one of the solution is to buy a bigger machine or is to buy more machines
+
+the ability to handle more requests by buying more machines or by buying a bigger macchine is called scalability.
+
+buying a bigger machine so our machine can handle more requests -> vertical scaling
+buying a more machines, so that rrequests can randomly distributed among these machines -> horizontal scaling
+
+horizontal scaling and vertical scaling are the two mechanisms by which we can increase the scalability of our system
+
+scalibity is being able to handle more requests
+
+
+horizontal scaling                                      vertical scaling
+1. load balancer is required                   1. load balancer is not required
+2. resilint(+)                                 2. single point of failure
+3. network calls                               3. iterprocess calls(+)
+4. data inconsistency                          4. data consistent(+)
+5. scales well as users increases(+)           5. hardware limit
+
+real solution is hybrid scaling: initially we should go for vertical scaling and if users trust us and number of users increasewe can go for horizontal scaling
+
+is it scalable?, is it resilent and is it consistent -> these are the mahor concerns that we have during designing a system
