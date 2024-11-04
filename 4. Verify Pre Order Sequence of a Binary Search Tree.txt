@@ -1,0 +1,43 @@
+given a pre order traversal of a binary searh tree respresented in the array we need to verify if it the pre order sequence is correct
+
+key concepts:
+ 1. pre order traversal means visiting the root node first, followed by the left sub tree and finally the right sub tree
+ 2. in bst, for any node n:
+   1. all values in the left sub tree are smaller than the value of n.
+   2. all values in the right sub tree are larger than the values of n.
+Approach:
+ to verify if the given sequence can represent a valid pre order traversal of a BST, we need to ensure that 
+  1. each element the current root value follows the BST properties.
+  2. once we move to the right sub tree, all elements should be larger than the values in the left sub tree.
+
+Steps:
+ 1. use a stack to simulate the preorder traversal.
+ 2. traverse the array while maintsining a variable minvalue to track the allowed minimum values as we process nodes.
+ 3. for each node:
+   1. if the current value is smaller than minvalue, return false -> because it is violating the BST.
+   2. otherwise update the minvalue when popping from the stack, which means we are pricessing the right subtree
+ 4. push nodes on to the stack when traversing to simulate the pre order structure
+
+once we encounter a value that is greater than the root, all subsequent values should be greater than the current node. -> they should go to the right subtree
+ 
+as we iterate through the array:
+ 1. if we encounter a value that violates the BST property i.e it is smaller then the current minvalue value, it meas this cannot be a valid pre order traversal
+ 2. if the value is greater than the minvalue value, it means we hae finished the left sub tree, and we are moving to the right sub tree, we need to update our minalue variable
+     accordingly
+in BST, left subtree values will be smaller than root and right subtree values will be greater than the root -> main logic
+int low=integer.min_value
+for(int i: arr)
+{
+  if(i<low)
+   return false -> need more understanding
+  while(!stack.isEmpty() && value>stack.peek())
+   low=stack.pop();
+ stack.push(i)
+}
+
+1. in pre order traversal of binary search tree, the first element is root followed by elements in the left subtree and then right subtree
+2. left subtree contains values less than the root node and right subtree contains values greater than the root node.
+3. while loop checks whether the current value is greater than the top of the stack(which represents the last valid node in left subtree), if it is greater, it means we are done
+   with the left subtree of that node and arw now transitioning to the right subtree, so we pop the node from the stack and update low to that node's value
+   this updated low represents the minimum value that future nodes in this subtree must adhere to.
+ 

@@ -1,0 +1,25 @@
+optimizing a query traditiobnal ways:
+  nosql, indexing, query optimizer
+
+Sharding:taking one attribute in the data and partitioning the data such that each server gets one chunk(range of data)
+server here are database servers
+
+horizontal partitioning: depends on 1 key whuch is an attribute of data that we are storing to partition the data
+
+vertical partitioning: uses columns
+
+sharding: uses horizontal partitioning i.e uses a key 
+
+database properties:
+ consistency: what we store in database is what we read out of it
+ avsilability: database should not crash, 
+but consistency trumps availability when it comes to data, in most cases
+
+what should we shard our data: it can be anything for ex in application like lindo it can be on location so if they want to find a person in city x,
+we can look in the database server that is sharded based on that city
+
+problems:
+1. joins: each shard will be maintained by a server, when we have to join it becomes a problem
+2. inflexible: using hierarchial sharding we can get rid of this problem
+we can create a index on each shard
+3. what if a shard fails at any point, for this we can have a master slave archirtecture where 

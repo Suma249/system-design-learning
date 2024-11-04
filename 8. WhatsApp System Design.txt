@@ -1,0 +1,160 @@
+whatsapp has group messaginga nd read receipts -> 2 key features in whatsapp
+features:
+ 1. group sharing: can image and video be shared in the group chat
+ 2. sent + delivered read receipts
+ 3. last seen
+ 4. image sharing -> tender design notes
+ 5. chats are temporary or permnent
+ 6. one to one chat
+
+1.group messaging
+we have a application installed on cellphone and we connect to whatsapp on the cloud and the place where we connect is called gateway(reason for this is because
+ we will be using external protocol, when we are talking to whatsapp, but whatsapp might be talking in different language with its internal services
+main reason being that we dont need much security, we dont need thpse big headers that http provides us when we are talking internally because lot of the security 
+mechanisms are taken care on the gateway itself), so once we do connect to the gateway, lets say we are sending message to the person b and we are person a.
+person b connects to gateway, the gateway actually needs to send it to person b. we could store this information as to which users are connected to which box
+in the gateway itself, in that case we would need some sort of a user to box mapping. for the gateway service, which is a micro service itsekf it needs to store
+the information as to the particular user is currently connected to so and so box(gateway) number, when we have this kind of information being stored on the boxes itself
+its going to be expensive(because maintaining tcp connection itself takes some memory) and this information is duplicated on all three servers
+so, we can have micro service called session micro service this service store who is connected to whom information
+now, gateway has been decoupled from the system and the information is being store by seperate micro services
+
+
+when user a is sending messages, it actually asks for send message with the user id for b, gateway does not know now what to do, so it sends it to the
+session service, this session service is indirectly a router, when it gets the message or request to send message to user b, it figures out where does user b 
+exist, which gateway user b is connected to and routes the message to that gateway to send it back to user b
+
+with server client http protocol -> using long polling we can do, but we cannot use it as it is not a good idea
+
+websockets -> are good idea when it comes to chat application as it folows peer to peer pattern
+
+when b got the message, message has been delivered.
+, how can we notify user?, when message gets to gateway or session service we can send a parallel response to gatewaty, saying that it got message and it will be delivered to user b
+lets say a different database for chat, because its stored in the database its safe, persistent, will send a sent receipt to user a
+
+once we send message to b and user b actually got the message, it shoud again goto its gateway and say that it got a message, which is an acknowledgement
+when the gateway receives this it sends it back to the session service , saying the message was received and the message contains to and from details
+session service will find out where from user exists and sents the delivery receipt to from user
+
+2. last seen / online
+lets say user b wants to know when was the last time user a was online, now lets say user a is not in the picture
+messages sent and received to user b are from server. now, user b asks server when was the last time user a was online, for this there needs to 
+be some information in some tablesaying that this user was last online at so and so time
+for every userr there will be an entry like key:value in this table, saying this user was last online at so and so time
+how can we get last online value?, whenver user a does an activity basically sending a message or reading a message or any kind of request to the server
+should be logged as an activity and that current timestamp shoud be persisated in this table, in this way we can get the last online information
+
+whenver user sends a request to the server, we will have a last seen microservice  and it does user activity tracking , anytime there is an activity 
+they definuteky send a message to the gateway, when they do so we are going to say that they are last seen at that point
+
+two types of messages sent by client
+ 1. by user: send it to last seen service
+ 2. by application : dont send it to last seen service
+
+load balancer
+
+
+
+group messaging: 
+lets say 2 users are connected to gateway1 and 3 other users are connected to gateway2, one of the users from these 3 users will send a message 
+problem here is that if session service stores all the information fir all groups, lets say red group has those 3 users and they are connected to these 3 boxes
+its too complicated for session service to handle, its something we can decouple
+so we can decouple the information for who is exesting in which group in a group service
+now, session service when it gets the message from a red user, its is going to ask the group service about who are the other group members in that griup
+the group service can then respond
+session service has a database maintaing which user is connected to which connection and this connection tells which box or gateway it exists in, so with 
+this information it can then route messeges to each
+
+did not understand
+
+
+
+Whatsapp System Design - 
+components required:
+consider a ideal scenario where there are 2 guys A and B, and if these 2 guys wants to exchange some information, how do they does that?
+guy A knows the address of guy B, so it can send message to guy B and vice versa and consider this is a small network
+what if the network is internet?
+if it is a internat, consider that there are billions of users which are using this chat application, in this scenario it is very difficult to know the address of 
+each and every guy in the internet, that is not a feasible scenario to make the system robust and high available, we need to bring something called as server
+in between, job or work of this server is to coordinate messages between all the clients which are connected to this particular server, consider 
+we also have other guys C,D, E and F connected to this server, if we want to send message, what is does is it comes to the server and the server knows the
+address of the opposite guy to whom we want to send message and it redirects the message to the intended person 
+
+when there is a question to design something, dont jump right into the question and start answering that instead take a minute and think about all the features
+tht you want to incorporate  in the application and start building it, if there is any doubt -> ask the interviewer
+
+for whatsapp system design
+1. what is the scale at which application works or what is the userbase, userbase is really important to understand, how many users are actually is going to interact with this application
+   that means that the design drastically changes
+2. do we need a feature like last seen of an user
+3. do we need support to send media like images or audio or video
+4. do we need to encrypt our messages
+5. do we need to support dtelephony services like audio call or video call
+
+system design components
+consider we have 2 parties A and B, and we need a server between these two guys lets call it as messaging server
+when we have billions of users, we need multiple messaging servers, when we have multiple messaging servers, it is horizontally scaled or distibuted
+in this case, users cannot connect to messaging servers randomly, that when the loadbalancer comes in between users and servers
+we need database to save to save some state or messages
+
+how the connection works?
+connection over here is a duplex connection, it is bidirectional in nature, when connection is established between client and server, messages can flow in both 
+directions i.e from client to server and server to client 
+
+consider user A wants to send a message to user B , what happens now is user A has the message, and consider user A is not connected to the system
+now what happens user A has the message and this message will be saved in the local database of the application and as soon as the user A connects to the
+messaging server, connection establishes, and the message is recived by messaging server, once the messaging server recieves this message what it does is
+it looks for the connection or the process which is responsible to send the message to user B and it hands the message over to that particular process
+and that message will be sent to user B for some reason if client B is not connected to the internet or messaging server this message will be saved in the database
+and as soon as the messaging server learns that user B has connected back to the internet , it retrisves the message from the database  and then sends the message to uiser B
+using the connection that is establishes
+in all the scenarios users(vlients) are the one who establishes the connection and server will never establish a connection because server
+will never know the address of the client but client knows the address of the server and that is the reason client estabnlishes the connection
+
+acknowledgements:
+when the message is sent -> 1 tick mark
+when message is delivered -> 2 tick marks
+when message is read -> blue colur of 2 tick marks
+when client A sends the message, message originates from client A and the message reaches the messaging server
+as soon as the messaging server receives the message it sends the sensor information to client A saying it has received the message successfully
+thats when it displays single tick mark -> message has been received in the server
+when the messaging sever finds the target user for this message, abd delivers the message, client B will send acknowdledgement saying it has received the message 
+thats when we will give 2 tick marks
+when the user reads the massage client sends the other acknowledgement saying the message has been red and thats when messaging server will send 
+information to source client saying the message has been red
+
+how exactly the messagig sever will work?
+everytim when a connection is established from client to server there will be a respective process or thread that will be created
+and that thread which is long running is responsible for handling messages for that prticular connection and there will be a respective queue
+associated with every thread or process, and whatthis queue does is it is a buffer where the mewssages can be sent by any other different processes
+now lets say client A has connection established with messaging server which means internally there is a thread and queue fdor this connection created in messaging server
+and client B  also has established a connection and same thread and queue will be created for cliewnt B  connection internally in messaging server
+which saves the messages or which acts as a buffer for messages
+and after this we will add a entry in db, these process id and its user id
+now, what happens is A wants to send message, A sent a message and this message will be received by the thread or process associated with the connection established by client A with messaging server
+this process or thread will keep on listening to the connection for messages, this thread wil take the message and queries the database for 
+give me the process id for the client as this message is destined for client B
+and finds that client B  is handled by process with process id 2, now client A's process will send message recieved from cliemt A
+to the queue of process 2 of client B's connection
+what if client B is not connected to messaging server where there is no process available for clint B as there is np connection established between client B  and messaging server
+client A' process will search in the db for client B's process and does not find it, in this case client A' process will take this message and
+saves it in one more database in a table which has user id vs messages, it saves all messages which could not be delivered as there target client is not connected to the messaging server
+and when client B  connects to the messaging server, a process for cliwnt B  will be created and it will also check in the db to see if there
+are any messages for this client i.e client B
+
+other features
+1. last seen:we need something called as last seen heartbeat which will be alwys sent by the client and we should keep on saving it in the table 
+consider we have a table which has say user id and timestamp, consider that client is configured to send heartbeat every 5 second only if the user is active using the application only
+what happens is, when user is using the application, every 5 seconds once cliemt will keep on sending the heartbeat saying thst application is being used by the user
+and database for this will keep on updating it 
+
+2. Media: 
+for the media transfer we will use http server also we should be havig cdn connected to this htp server
+whenver client uploads the image , client will not use the existing connection with the messaging server but it will upload the message directly intithe http server
+once the image is uploaded to the http server, server is going to return the hash or unique id for that particulsr resource 
+we get the hash back to the client, and nosw the message will contain hash and the medua type over the existing connection to the messaging srver and this message will be sent
+client B, when message is recuved on the client B , client B is going to use that hash and downloads the media from the same http server or cdn server
+3. encryption
+we can have same key shared between the two clients who are communicating 
+
+technologies used: 

@@ -1,0 +1,9 @@
+the problm is adding and removing serves that totally changes the locak data in each server and to avaid that we are going to use
+1. we are still going to use the hashing of request id, hash(r1)
+2. we use circular data structure instead of array of size m, index from  0 to m-1
+3. we can take the servers, we need to send these requests to the severs, and servers themselves have id's from 0 to n, lets say we have 4 servers
+5. so what can we do is we can hash the server id's as well using the same hash function or different hash function, and then take the remainder of the hashed server id with'
+  the search space which is m
+6. now whenver a request comes in, we go clockwise and find the nearest server
+
+not understood properly

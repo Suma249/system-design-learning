@@ -1,0 +1,45 @@
+message queue: a list that maintails the orders and start processing the requested order activities(like pizza ordering)
+queue: of pizza orders, that is beig mirrored by list when we are done doing pizza we can remove it freom this queue and list
+here the processes are asynchronous, with this methpd os processing orders can be processed asynxhronously
+
+lets say we have three pizza shops, and each pizza has multiple clients
+and if we assume worst scenarios, if one of the shops actually goes down: there's a power outage, or could be anything
+if it does go down, then we need to get rid of all our takeaway orders  like we can dump them
+delivery orders will be sent to other shops, in this way we can still save monwy
+
+like pizza shop 3 goes down, all its clients should be connected to other 2 shops and ther orders shoulfd be sent to these 2 shops
+
+how can this be achieved?
+maintaing a list does not work, as once the electicity ois lost computer shuts down and we will looose the list.
+so, we need some sort of persistence in our data i.e we need a database
+
+now, we will have list of servera s0, s1, s2 and s3 and a database storing the list of orders
+
+servers contains orders in the following way
+s0 -> 2, s1 -> 8, s2 -> 3 and s4 -> 9, 11
+
+lets say now s3 crashes, in this case order 9 and 11 should be rerouted, one way is we can check in the database to see the orders processed by server s3
+but it is complicated
+
+instead whsat we can do is, we can have some sort of notifier, thsat is going to be checking for heartbeat in each server
+it talks to each servewr and asks them if they are alive, what happens with that is if a server does not respond, then the notifier assumes that 
+server is dead, if it is dead we cant handle the orders and then it can query the database to see the orders that are not done , it picks those orders and distributes
+them to the active servers, but what if there is a duplication? like this notifier service will pickup all the orders tat are not done and it will distribute it
+here it might end up dustrubuting same orders with different servers
+what we can do in this situations is load balancing: load balancer will send the right amount of load to each server and principle sof load balancing ensure sthat
+you dont have duplicate requests to the same server(ex: consistentr hashing)
+each 
+. load balancer balances both the load and not sennding duplicates to the same server
+reason for that is each server will handle its own buckets, once any server crashes other servers won't loose theor buckets but they will get new buckiets 
+added to them
+
+through load balancing and through some sort of heartbeat mechanishm we can notify all the failed orders to the new servers
+
+if we want to have a all the features of assignment or notification, load balancing, a heartbeat in all one thing -> that would be a message queue
+
+message or task queue: takes tasks, persists them, assigns them to the correct server and waits for them to complete
+if it taks too long for the server to give an acknowledgement, it feels that server is dead and then assigns it to the next server
+there will be multiple strategies regarding how it assigns but all that is encapsulated by task queue
+
+example of message queue is: rabbit mq
+libraries like java mq they allow us to write a message queue 

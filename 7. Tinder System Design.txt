@@ -1,0 +1,51 @@
+approach is from front to back: i.e think about what users need as features, think about how your services are going to actually be broken down so that 
+you can fulfill these features, and then think about their individual data requirements per service -> in this way , your system is far more flexible and lot
+easier to start off with the system immediately
+
+features we are picking up in tinder are: storing profiles, in this profile there going to be images follow up questuon will be how many images per user do you want
+that could be 5, next feature how are going to recommend matches(question: how many active users do you have,), third feature: note down the matches(for each persson, we can have 0.1% matching with someine->number of active users*10 power -3)
+fourth feature: after matching, we need to have a messaging feature
+always avaoid taking too many features, start with 4 or 5 fetaures
+
+storing images:
+question: how are we going to store images?
+  whether we want to store images as file or as BLOB(binary large object)
+  images are typically large in size thats why we have BLOB
+database guarantees us:
+ 1. mutability: are you ever going to be changing the image? you could: yes, but why would you ever want to do that, why not just create a seperate file becasue an updtae to image is not jsut going to be 
+                few bits, its going to be the entire image, so why not store that in seperate file and get rid of mutability i.e make it immutable, so muatbility is unnecessary feature
+ 2. transaction: transaction properties are not going to be required by images, as we are not going to do the atomic operation on the image, so we can get rid of this feature of database
+ 3. indexes: to improve search capabilities, it is important for searching. for blob objects, indexing is unncessary as we are notr going to search image based on the content, so we can get rid of this feature
+ 4. access control: it is important one, but we can get the same access control mechanish using file system. it is a little tidious may be, but setting up a secure file system is as tidious as setting up a 
+                     secure database, so nearly equal
+good things about file are that
+ 1. its cheaper
+ 2. Faster: as they store large objects seperately, in database they store large objects using vertical partitioning  where the profile id and image id will be together and image will be stored somewhere else
+ 3. cdn allows faster access
+ 4. file url, image id and profile id -> this will be stored in the database
+ 
+this file will be in distributed file system -> so req 1 is handled by diostributed file system
+
+system design
+
+we have client application on mobile, a use clicks a button to send a request and w ehave profile service running somewhere 
+client application needs to register with the profile service
+
+in update profile: how to make sure it from the authenticated user itself: using tokens
+
+using gateway: clients talk to gateway, gateway takes the request asks the profile service if the request authenticated or not , yse or no response from profile service
+ will decide gateway's action
+
+using gateway, we have decoupled the applications
+
+2. recommendation feature
+  based on gender i am interested in, which age group i am interested in , and the location
+
+3. direct message feature
+when we have client server communication protocal, we cannot effectovely have chat effectively(As it involves client poling server), so we should got peer-peer protocol
+ if server needs to send message, it can and this can be done using prptocol XMPP
+xmpp takes websocket connection
+with every connection id, we need to know which user is using that connection, to the same connection if people are connected means that they are chattoing
+we can let gateway to do this or we can have a seperate service that can handle sessions -> it stores connection information with that we can figure out which user is using which connection and we can send connewction request to socket
+
+4. Matching feature

@@ -1,0 +1,20 @@
+consistent hashing: hashing of objects.
+
+lets say we have a system ruynnig algorithm and some one wants to use it for money, as we have customer we should have this system always running and 
+since my system is running a algorithm used by some one else it is called server 
+and person sending request to the server to get the response
+now if the number of users using our code increases, to jandle more rqeuests will add one more system with the code
+so, now since we have 2 servers, when the request comes to which server should we redirect?
+concept of taking n servers and managing the load on them evenly -> load balancing
+
+we will get request id in all the requests from user to our server , lets say this id is in the range 0 to m
+we can take this request id, lets say r1 and we can hash it
+when we hash it will get a number and this number can be mapped to one of the available servers by taing modulus of objatiner number by hasing with n(number of serers)
+hash(r1) -> m -> m%n -> asnwwrr can be in the range (S0,s1,s2,......,sn)
+
+hash functiuon is uniformly random, so we can expect server to have uniformly random
+
+when we add more server, this logich need to be changed , cost of the change is really large
+request id is nrver random in real, hash fuction might give the smae results againa nd agian as hash function is constant and in this case it sends the request to 
+the same server, when we send the request to the same server we cans tore the resukst for the request in the local cache -> but when we add more servers all this info will be dumped
+so ths is a juge change
