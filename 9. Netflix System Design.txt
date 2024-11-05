@@ -1,0 +1,44 @@
+netflix operates in two clouds, aws and openconnect. both coulds must work together seamlessly to deliver endless hours of video
+
+netflix has 3 main components'
+1. openconnect
+2. backend
+3. client 
+
+high level working of netflix
+client: a device from which you play video on, it could be desktop or andriod or iphone 
+anything that does not invovle in video streaming is all handled in aws cloud 
+anything which is invoved in streaming the video is completely handled by openconnect
+
+what is openconnect?
+openconnect is netflix's own CDN, it is a network of distributed servers that is maintained by netflix
+CDN: content delivery network which is a network of distributed servers which are placed in different locations to serve the content much faster
+we can ahve main server in one place and cache servr in other loactions , in this way we can reduce the time taken to deliver the data
+
+what netflix has done is, they have placed lot of servers evry country, so that if the user is requesting a video a vedio data from very nearest server to the user
+is played  
+
+client: netflix supports lots of different devices, all these devices are writtent usig platform specific code 
+
+elstic load balancer: netfix uses amazon's elastic load balancing service to route the traffic to different frontend  services
+elastic load balancer is setup such a way that load is balanced across the zones first(nearest) and then across instances and this schema is called
+as two tier balancing
+first tier is consits of basic dns based round robin load balancing,when the request lands on the load balancer , it will balance across the zones using
+round robin 
+zones are kind of logical grouping of servers theer could be 3 ddifferent zones in one location and 1 zone in another location 
+second tier of elastic load balancing service is the array of load balancers instances which does round robin load balancing
+on the instances to distribute the requests across the instances
+say fot ex when the req comes in, first tier distributes the load on different zones and the next tier distributes between the isntances
+
+how netflix will onboards a video?
+before a video or movie is made available to the users, what netflix does is it does do a lot of preprociessing and this preprocessing invovles finding errors
+converting the video into different resolution, different format this process is called as transcoding or encoding
+transcoding is a process that converts a video into different format and it will be optimized for particular kind of devies as netflix supports different devices
+adaptive bitrate streaming?
+netflix creates 1200 different copies of the same movie to paly the movie in different resolutions
+and to do this netflix uses lot of different worker nodes to do that
+
+when they wantto onboard a particular movie, they get the movie as a single file which is about say 50GB and then what they do is 
+they break that movie into a lot of peices or chunks and put it all into the queue and these individual tasks
+which needs to be processed for each clip will be placed in the queue and then these tasks will be picked up by the different workers and they all process
+different chunks togetheer and then they merge all thes eprocessed clips and places them into amazon s3
